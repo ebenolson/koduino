@@ -138,7 +138,7 @@
 /** @addtogroup STM32F37x_System_Private_Variables
   * @{
   */
-uint32_t SystemCoreClock    = 72000000;
+uint32_t SystemCoreClock    = 8000000;
 __I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 
 /**
@@ -305,8 +305,8 @@ static void SetSysClock(void)
 
   /* SYSCLK, HCLK, PCLK2 and PCLK1 configuration -----------*/
   /* Enable HSE */
-  // RCC->CR |= ((uint32_t)RCC_CR_HSEON);
-  RCC->CR |= ((uint32_t) (RCC_CR_HSEON | RCC_CR_HSEBYP));
+  RCC->CR |= ((uint32_t)RCC_CR_HSEON);
+  //RCC->CR |= ((uint32_t) (RCC_CR_HSEON | RCC_CR_HSEBYP));
   
   /* Wait till HSE is ready and if Time out is reached exit */
   do
