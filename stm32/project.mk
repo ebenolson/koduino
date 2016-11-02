@@ -65,7 +65,7 @@ $(shell   mkdir -p $(BUILDDIR))
 PROJNAME  = $(subst $(SPACE),_,$(shell basename $(CURDIR_NOSP)))
 
 # Print some stuff
-$(info Compiling for $(VARIANT), MCU = $(MCU), project = $(PROJNAME), upload method is $(UPLOAD_METHOD))
+$(info Compiling for $(VARIANT), MCU = $(MCU), project = $(PROJNAME), upload method is $(UPLOAD_METHOD), CLKSRC=$(CLKSRC))
 
 # Compile options
 STD_PERIPH_MODULES = adc exti flash gpio i2c misc pwr rcc spi syscfg tim usart dma
@@ -129,11 +129,16 @@ OBJS = $(C_OBJS) $(CXX_OBJS) $(S_OBJS)
 OBJS += $(patsubst %.c,$(BUILDDIR)/%.proj.o,$(notdir $(wildcard $(CURDIR_NOSP)/*.c)))
 OBJS += $(patsubst %.cpp,$(BUILDDIR)/%.proj.o,$(notdir $(wildcard $(CURDIR_NOSP)/*.cpp)))
 
-all: flash
+all: bin
+
+bin: $(BUILDDIR)/$(PROJNAME).bin
+
 
 # $(KODUINO_DIR)/system/stm32flash/stm32flash -i -rts,-dtr,dtr:rts,-dtr,dtr -w $< -R -b $(UPLOAD_BAUD) -n 1000
-flash: $(BUILDDIR)/$(PROJNAME).bin
-
+flash: bin
+ifeq ($(UPLOAD_METHOD), STLINK)
+	st-flash write $(BUILDDIR)/$(PROJNAME).bin 0x08000000
+else
 ifeq ($(UPLOAD_METHOD), SERIAL)
 ifneq (,$(findstring MINGW, $(UNAME)))
 # stm32ld
@@ -161,6 +166,7 @@ ifeq ($(UNAME),Linux)
 	@sudo dfu-util -d 0483:df11 -a 0 -s 0x08000000 -D $<
 else
 	@dfu-util -d 0483:df11 -a 0 -s 0x08000000 -D $<
+endif
 endif
 endif
 endif
